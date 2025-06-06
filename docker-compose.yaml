@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  tg_bot:
+    image: r1kenpy/tg_bot_mvp:latest
+    env_file: .env
+    container_name: tg_interview_bot
