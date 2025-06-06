@@ -14,6 +14,7 @@ if __name__ == "__main__":
         level=logging.INFO,
     )
     if isinstance(NEED_CREATE_DB, str) and NEED_CREATE_DB == "True":
+        logger.info("Инициализация DB")
         CreateDB()
     logger.info("Starting bot ...")
     bot.infinity_polling()

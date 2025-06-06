@@ -3,8 +3,6 @@ from collections import namedtuple
 from contextlib import contextmanager
 from sqlite3 import Connection
 
-from utils import get_logger
-from utils.constant import CATEGORIES, DB_NAME, GRADES
 from db.sql import (
     ADD_ANSWERS_IN_TABLE,
     ADD_CATEGORY,
@@ -14,10 +12,16 @@ from db.sql import (
     CREATE_TABLE_CATEGORY,
     CREATE_TABLE_GRADES,
     CREATE_TABLE_QUESTIONS,
-    GET_GRADE_ID_BY_TITLE,
-    GET_QUESTION_ID_BY_TITLE,
 )
-from utils.parse_task import parse_file
+from utils import get_logger
+from utils.constant import (
+    CATEGORIES,
+    DB_NAME,
+    GRADES,
+    PYTHON_ANSWERS_PATH,
+    PYTHON_QUESTIONS_PATH,
+)
+from utils.parse_file import parse_file
 
 logger = get_logger("init_db")
 
@@ -54,33 +58,6 @@ class CreateDB:
         return sqlite3.connect(DB_NAME)
 
     @classmethod
-    def __add_data_in_db(
-        cls, answers_quesions: dict[str, list]
-    ) -> list[tuple[str, int, int]]:
-        data = []
-        try:
-            with cls.con:
-                for key, value in answers_quesions.items():
-                    logger.info(f"{key=}, {value=}")
-                    question_id = cls.con.execute(
-                        GET_QUESTION_ID_BY_TITLE, (key,)
-                    ).fetchone()
-                    logger.info(f"{question_id=}")
-                    for answer in value:
-                        logger.info(f"{answer=}")
-                        grade_id = cls.con.execute(
-                            GET_GRADE_ID_BY_TITLE, (answer["difficulty"],)
-                        ).fetchone()
-                        logger.info(f"{grade_id=}")
-
-                        data.append((answer["content"], grade_id, question_id))
-
-        except Exception as e:
-            logger.exception(e)
-
-        return data
-
-    @classmethod
     def __create_table(cls) -> None:
         with cls.con:
             for sql in (
@@ -89,11 +66,10 @@ class CreateDB:
                 CREATE_TABLE_GRADES,
                 CREATE_TABLE_QUESTIONS,
             ):
-
                 cls.con.executescript(sql)
 
     @classmethod
-    def __add_data_in_table(cls, data, sql: str) -> None:
+    def __add_data_in_table(cls, data: list[list], sql: str) -> None:
         with cls.con:
             try:
                 cls.con.executemany(sql, data)
@@ -102,19 +78,25 @@ class CreateDB:
 
     @classmethod
     def __initial_table(cls) -> None:
-        qestions, answers = parse_file()
+
         try:
+            qestions = parse_file(PYTHON_QUESTIONS_PATH)
+            logger.info(f"{qestions=}"[:100])
+            answers = parse_file(PYTHON_ANSWERS_PATH)
+            logger.info(f"{answers=}"[:100])
             cls.__create_table()
+            logger.info("Таблицы созданы")
             cls.__add_data_in_table(
                 CATEGORIES,
                 ADD_CATEGORY,
             )
+            logger.info(f"Добавлены категории: {CATEGORIES=}"[:100])
             cls.__add_data_in_table(qestions, ADD_QUESTIONS_IN_TABLE)
+            logger.info(f"Добавлены вопросы: {qestions=}"[:100])
             cls.__add_data_in_table(GRADES, ADD_GRADES_IN_TABLE)
-            answers_for_db = cls.__add_data_in_db(
-                answers,
-            )
-            cls.__add_data_in_table(answers_for_db, ADD_ANSWERS_IN_TABLE)
+            logger.info(f"Добавлены грейды: {GRADES=}"[:100])
+            cls.__add_data_in_table(answers, ADD_ANSWERS_IN_TABLE)
+            logger.info(f"Добавлены ответы на вопросы: {answers=}"[:100])
         except Exception as e:
             logger.exception(e)
         finally:
