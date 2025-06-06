@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-
 GRADES = (
     ("UNKNOWN",),
     ("GRADE_16",),
@@ -18,8 +17,6 @@ GRADES = (
 
 CATEGORIES = (("Python",),)
 
-
-MAX_ROW_WIDTH = 2
 PARSE_MODE = "Markdown"
 NO_QUESTIONS = "Еще не добавили вопросы!"
 
@@ -27,7 +24,6 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 TG_USER = int(os.getenv("TG_USER", "0"))
 NEED_CREATE_DB = os.getenv("NEED_CREATE_DB", "")
 DB_NAME = os.getenv("DB_NAME", "")
-
 
 BASE_PATH = Path(__file__).parent.parent
 TASK_PATH = BASE_PATH / "task"

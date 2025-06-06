@@ -53,8 +53,13 @@ def start_message(message):
     question_in_db = get_random_question()
     keyboard = None
     logger.info(f"{question_in_db=}")
-    question_id = question_in_db.id
-    if question_id:
+    try:
+        question_id = question_in_db.id
+    except AttributeError as e:
+        question_id = None
+        logger.exception(e)
+
+    if question_id is not None:
         question_text = get_question_text_by_id(question_id)
         grades = get_grades(question_id)
         keyboard = questions_keyboard(grades)
