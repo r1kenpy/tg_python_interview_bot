@@ -7,12 +7,12 @@ load_dotenv(".env")
 
 GRADES = (
     ("UNKNOWN",),
-    ("GRADE_16",),
-    ("GRADE_17",),
-    ("GRADE_18",),
-    ("GRADE_19",),
-    ("GRADE_20",),
-    ("GRADE_SCREENING",),
+    ("GRADE: 16",),
+    ("GRADE: 17",),
+    ("GRADE: 18",),
+    ("GRADE: 19",),
+    ("GRADE: 20",),
+    ("GRADE: SCREENING",),
 )
 
 CATEGORIES = (("Python",),)

@@ -14,7 +14,8 @@ from .keyboard import (
     back_keyboard,
     questions_keyboard,
 )
-from utils import get_answer, get_logger
+from utils import get_logger
+from utils.answers import get_answer
 from utils.constant import BOT_TOKEN, NO_QUESTIONS, PARSE_MODE, TG_USER
 from utils.grades import get_grades
 from utils.questions import (

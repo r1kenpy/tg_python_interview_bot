@@ -13,7 +13,7 @@ def get_answer(question_id, grade_id) -> str:
         ).fetchone()
     logger.info(answer)
     if answer.a_id:
-        grade = answer.grade.lower().replace("_", ": ")
+        grade = answer.grade.lower()
         text = f"Вопрос №{question_id} | {grade}\n\n{answer.content}"
 
     logger.info(text)
