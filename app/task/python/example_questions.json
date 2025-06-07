@@ -1,0 +1,10 @@
+[
+    {
+        "title": "example Title questions",
+        "additional": "example additional",
+        "category_id": 1,
+        "interview_count": 10,
+        "text_question": "example text question",
+        "time_dicision": 10
+    }
+]
