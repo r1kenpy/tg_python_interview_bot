@@ -180,6 +180,8 @@ task_learn
 .DS_Store
 .vscode
 tz.md
-*.json
+
 todo.md
 dff
+.ruff_cache
+archive
