@@ -185,3 +185,5 @@ todo.md
 dff
 .ruff_cache
 archive
+answers.json
+questions.json

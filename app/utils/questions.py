@@ -1,16 +1,21 @@
-from db.db import get_connection
-from utils import get_logger
-
+from db import cur
+from db import get_connection
 from db.sql import (
     GET_ADDITIONAL_BY_QUESTION_ID,
     GET_QUESTION_BY_ID,
     GET_RANDOM_QUESTIONS,
 )
+from utils import get_logger
+
 
 logger = get_logger()
 
 
 def get_question_text_by_id(question_id: int) -> str:
+    # Возможно стоит отдавать голый результат.
+    # А след шагом обрабатывать его преобразование в текст.
+    # Так будет  чише. т.к. функция отвечает только за одно
+
     with get_connection() as con:
         res = con.execute(GET_QUESTION_BY_ID, (question_id,)).fetchone()
     return get_question_text(res)
@@ -18,8 +23,7 @@ def get_question_text_by_id(question_id: int) -> str:
 
 def get_random_question():
     with get_connection() as c:
-        res = c.execute(GET_RANDOM_QUESTIONS).fetchone()
-    return res
+        return c.execute(GET_RANDOM_QUESTIONS).fetchone()
 
 
 def get_question_id(question) -> int:

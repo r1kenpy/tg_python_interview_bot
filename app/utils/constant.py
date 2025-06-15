@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv(".env")
 
 GRADES = (
-    ("UNKNOWN",),
+    ("GRADE: UNKNOWN",),
     ("GRADE: 16",),
     ("GRADE: 17",),
     ("GRADE: 18",),

@@ -1,9 +1,20 @@
 import sqlite3
 from collections import namedtuple
 from contextlib import contextmanager
-from sqlite3 import Connection
+from typing import Any
 
-from db.sql import (
+from utils import get_logger
+from utils.constant import (
+    CATEGORIES,
+    DB_NAME,
+    GRADES,
+    NEED_CREATE_DB,
+    PYTHON_ANSWERS_PATH,
+    PYTHON_QUESTIONS_PATH,
+)
+from utils.parse_file import parse_file
+
+from .sql import (
     ADD_ANSWERS_IN_TABLE,
     ADD_CATEGORY,
     ADD_GRADES_IN_TABLE,
@@ -13,99 +24,101 @@ from db.sql import (
     CREATE_TABLE_GRADES,
     CREATE_TABLE_QUESTIONS,
 )
-from utils import get_logger
-from utils.constant import (
-    CATEGORIES,
-    DB_NAME,
-    GRADES,
-    PYTHON_ANSWERS_PATH,
-    PYTHON_QUESTIONS_PATH,
-)
-from utils.parse_file import parse_file
 
 logger = get_logger("init_db")
 
 
-def namedtuple_factory(cursor, row):
+def __namedtuple_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     cls = namedtuple("Row", fields)
     return cls._make(row)
 
 
 @contextmanager
-def get_connection():
+def get_connection(db_name: str = DB_NAME):
     try:
-        con = sqlite3.connect(DB_NAME)
-        con.row_factory = namedtuple_factory
+        con = sqlite3.connect(db_name)
+        con.row_factory = __namedtuple_factory
         yield con
     finally:
         con.close()
 
 
-class CreateDB:
+class WorkingWithDB:
     obj = None
 
     def __new__(cls, *args, **kwargs):
         if cls.obj is None:
-            cls.obj = super().__new__(cls)
-            cls.con = cls.__get_db_connection()
-            cls.__initial_table()
+            cls.obj = super().__new__(cls, *args, **kwargs)
+            if isinstance(NEED_CREATE_DB, str) and NEED_CREATE_DB == "True":
+                logger.info("Инициализация DB")
+                cls.__initial_table()
         logger.info(cls.obj)
         return cls.obj
 
-    @classmethod
-    def __get_db_connection(cls) -> Connection:
-        return sqlite3.connect(DB_NAME)
+    @staticmethod
+    def create_table(sql_scripts: list[str] | tuple[str, ...]) -> None:
+        for sql_script in sql_scripts:
+            if "CREATE TABLE IF NOT EXISTS" not in sql_script:
+                raise
 
-    @classmethod
-    def __create_table(cls) -> None:
-        with cls.con:
-            for sql in (
-                CREATE_TABLE_ANSWERS,
-                CREATE_TABLE_CATEGORY,
-                CREATE_TABLE_GRADES,
-                CREATE_TABLE_QUESTIONS,
-            ):
-                cls.con.executescript(sql)
+        with get_connection() as con:
+            for sql in sql_scripts:
+                con.executescript(sql)
 
-    @classmethod
-    def __add_data_in_table(cls, data: list[list], sql: str) -> None:
-        with cls.con:
+    @staticmethod
+    def add_many_data_in_table(
+        sql_query: str,
+        data: list[list[Any]] | tuple[tuple[Any]] | tuple[tuple[Any, ...]],
+    ) -> None:
+        with get_connection() as con:
             try:
-                cls.con.executemany(sql, data)
+                con.executemany(sql_query, data)
+
+                con.commit()
+            except (sqlite3.IntegrityError, sqlite3.ProgrammingError) as e:
+                logger.exception(e)
+
+    @staticmethod
+    def get_data_from_db(sql_query: str, data: Any = None):
+        with get_connection() as con:
+            try:
+                if data is None:
+                    return con.executescript(sql_query).fetchone()
+                return con.execute(sql_query, data).fetchone()
             except (sqlite3.IntegrityError, sqlite3.ProgrammingError) as e:
                 logger.exception(e)
 
     @classmethod
     def __initial_table(cls) -> None:
-
         try:
+            cls.create_table(
+                (
+                    CREATE_TABLE_ANSWERS,
+                    CREATE_TABLE_CATEGORY,
+                    CREATE_TABLE_GRADES,
+                    CREATE_TABLE_QUESTIONS,
+                )
+            )
+            logger.info("Таблицы созданы")
+
             qestions = parse_file(PYTHON_QUESTIONS_PATH)
             logger.info(f"{qestions=}"[:100])
+
             answers = parse_file(PYTHON_ANSWERS_PATH)
             logger.info(f"{answers=}"[:100])
-            cls.__create_table()
-            logger.info("Таблицы созданы")
-            cls.__add_data_in_table(
-                CATEGORIES,
-                ADD_CATEGORY,
-            )
+
+            cls.add_many_data_in_table(ADD_CATEGORY, CATEGORIES)
             logger.info(f"Добавлены категории: {CATEGORIES=}"[:100])
-            cls.__add_data_in_table(qestions, ADD_QUESTIONS_IN_TABLE)
+
+            cls.add_many_data_in_table(ADD_QUESTIONS_IN_TABLE, qestions)
             logger.info(f"Добавлены вопросы: {qestions=}"[:100])
-            cls.__add_data_in_table(GRADES, ADD_GRADES_IN_TABLE)
+
+            cls.add_many_data_in_table(ADD_GRADES_IN_TABLE, GRADES)
             logger.info(f"Добавлены грейды: {GRADES=}"[:100])
-            cls.__add_data_in_table(answers, ADD_ANSWERS_IN_TABLE)
+
+            cls.add_many_data_in_table(ADD_ANSWERS_IN_TABLE, answers)
             logger.info(f"Добавлены ответы на вопросы: {answers=}"[:100])
+
         except Exception as e:
             logger.exception(e)
-        finally:
-            cls.__close()
-
-    @classmethod
-    def __close(cls) -> None:
-        cls.con.close()
-
-
-if __name__ == "__main__":
-    CreateDB()

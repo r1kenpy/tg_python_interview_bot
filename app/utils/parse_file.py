@@ -1,11 +1,9 @@
 import json
+from pathlib import Path
 from typing import Any
-from pathlib import WindowsPath
 
 
-def parse_file(
-    path: str | WindowsPath, encoding: str = "utf-8"
-) -> list[list[Any]]:
+def parse_file(path: str | Path, encoding: str = "utf-8") -> list[list[Any]]:
     objs = []
     with open(path, "r", encoding=encoding) as f:
         data = json.load(f)

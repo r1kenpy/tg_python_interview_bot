@@ -1,0 +1,18 @@
+[
+    {
+        "title": "Test Title questions",
+        "additional": "test additional",
+        "category_id": 1,
+        "interview_count": 10,
+        "text_question": "text question TEST",
+        "time_dicision": 10
+    },
+    {
+        "title": "Test Title 2",
+        "additional": "test additional 2",
+        "category_id": 2,
+        "interview_count": 20,
+        "text_question": "2 text question TEST ",
+        "time_dicision": 0
+    }
+]

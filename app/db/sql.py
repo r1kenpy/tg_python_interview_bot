@@ -89,12 +89,12 @@ CREATE_TABLE_QUESTIONS = """
         time_decision INTEGER  DEFAULT 10 CHECK(time_decision >= 1),
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
     );"""
-
+# На вопрос должне быть только 1 ответ с одним грейдом. Нельзя сделать несколько ответов с одинаковым грейдом.
 CREATE_TABLE_ANSWERS = """
     CREATE TABLE IF NOT EXISTS answers(
         id INTEGER PRIMARY KEY,
         content TEXT UNIQUE NOT NULL,
-        grade_id INTEGER NOT NULL DEFAULT 1,
+        grade_id INTEGER NOT NULL DEFAULT 1, 
         question_id INTEGER NOT NULL CHECK(question_id >= 1),
         FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
         FOREIGN KEY (grade_id) REFERENCES grades(id) ON DELETE SET DEFAULT);"""

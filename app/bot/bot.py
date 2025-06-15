@@ -1,14 +1,10 @@
 import telebot
-
 from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot.custom_filters import AdvancedCustomFilter
 from telebot.types import CallbackQuery
 
-from .factory import (
-    back_questions_factory,
-    grades_factory,
-    question_factory,
-)
+from db import WorkingWithDB
+from .factory import back_questions_factory, grades_factory, question_factory
 from .keyboard import (
     add_additional_to_keyboard,
     back_keyboard,
@@ -80,7 +76,7 @@ def next_callback(call: CallbackQuery):
     question_in_db = get_random_question()
     keyboard = None
     logger.info(f"{question_in_db=}")
-    if question_in_db.id:
+    if question_in_db is not None:
         question_id = get_question_id(question_in_db)
         question_additional = get_additional_by_question_id(question_id)
         question_text, grades = return_all(question_in_db)

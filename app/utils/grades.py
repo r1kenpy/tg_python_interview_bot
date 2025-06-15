@@ -1,4 +1,4 @@
-from db.db import get_connection
+from db import get_connection
 from db.sql import GET_GRADES_ID_AND_TITLE_BY_QUESTION_ID
 from utils import get_logger
 
