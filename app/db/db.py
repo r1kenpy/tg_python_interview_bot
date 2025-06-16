@@ -74,8 +74,8 @@ class WorkingWithDB:
         with get_connection() as con:
             try:
                 con.executemany(sql_query, data)
-
                 con.commit()
+                logger.info(f"Добавлены в таблицу: {sql_query=}; {data[:10]}")
             except (sqlite3.IntegrityError, sqlite3.ProgrammingError) as e:
                 logger.exception(e)
 
@@ -109,16 +109,9 @@ class WorkingWithDB:
             logger.info(f"{answers=}"[:100])
 
             cls.add_many_data_in_table(ADD_CATEGORY, CATEGORIES)
-            logger.info(f"Добавлены категории: {CATEGORIES=}"[:100])
-
             cls.add_many_data_in_table(ADD_QUESTIONS_IN_TABLE, qestions)
-            logger.info(f"Добавлены вопросы: {qestions=}"[:100])
-
             cls.add_many_data_in_table(ADD_GRADES_IN_TABLE, GRADES)
-            logger.info(f"Добавлены грейды: {GRADES=}"[:100])
-
             cls.add_many_data_in_table(ADD_ANSWERS_IN_TABLE, answers)
-            logger.info(f"Добавлены ответы на вопросы: {answers=}"[:100])
 
         except Exception as e:
             logger.exception(e)
